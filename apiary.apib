@@ -1,0 +1,534 @@
+FORMAT: 1A
+HOST: https://api.big.flip.id/v1/
+
+# Big Flip API v1
+
+Dokumentasi ini berisi informasi tentang API yang dapat digunakan oleh pengguna layanan Big Flip. Saat ini, aktivitas yang tersedia pada layanan Big Flip hanya melakukan disbursement atau pengiriman uang.
+
+Dokumentasi ini akan diupdate secara berkala ketika ada perubahan. API ini akan tetap berada pada versi `v1` selama tidak ada perubahan yang mengubah response dari endpoint yang sudah ada sebelumnya. Jika dilakukan update yang mengubah reponse dari endpoint yang sudah ada sebelumnya (bukan penambahan endpoint baru), maka versi akan dinaikkan secara incremental (v2, v3, dst), dengan tetap menjaga agar versi-versi sebelumnya tetap bisa dipakai (ketika sudah v3, v1 dan v2 tetap bisa dipakai)
+
+Dokumentasi ini menyediakan beberapa fitur untuk mempermudah Anda dalam mencoba endpoint yang disediakan. Anda dapat mencobanya dengan mengklik salah satu endpoint yang diinginkan, kemudian klik tombol 'Switch to Console' pada bagian detil di sebelah kanan. Anda juga dapat melihat contoh kode untuk mengakses endpoint tersebut dalam berbagai bahasa pemrograman dengan mengklik dropdown bertuliskan 'Raw'.
+
+Seluruh perubahan yang dilakukan pada dokumentasi ini akan dituliskan pada bagian [changelog](#reference/changelog).
+
+API ini dibuat agar bisa digunakan semudah mungkin oleh developer, oleh karena itu Anda dapat menyampaikan kritik dan saran mengenai API ini melalui email ke email pribadi saya di [luqman@flip.id](mailto:luqman@flip.id).
+
+## General Explanation
+
+Untuk mengetahui status response apakah berhasil atau gagal, bisa dilihat dari `HTTP Status Code` pada masing-masing response. ([referensi](http://www.restapitutorial.com/httpstatuscodes.html)).
+
+Setiap request dikirimkan sebagai `application/x-www-form-urlencoded` kecuali jika diminta berbeda. Body dari request dikirimkan sebagaimana biasanya pada bentuk tersebut (post data), yaitu `atribut=value&atribut2=value2&atribut3=value3`, kecuali jika framework/bahasa/apapun yang digunakan menyarankan hal yang berbeda.
+
+HTTP Status Code **422** digunakan untuk menjelaskan error terkait kesalahan dari sisi user.
+
+Response untuk kode status http **422** akan memiliki format sebagai berikut:
+
+
+```
+{
+    "code": [outer_code],
+    "errors": [
+        {
+            "atribut": "[atribut]",
+            "code": [inner_code],
+            "pesan": "[pesan]"
+        }
+    ]
+}
+```
+
+ Value yang mungkin untuk `outer_code` adalah:
+ + `BALANCE_INSUFFICIENT` yaitu ketika saldo deposit akun anda tidak cukup untuk melakukan transaksi ( saldo < (nominal + biaya) )
+ + `VALIDATION_ERROR` error yang terkait validasi data atau data yang tidak memenuhi syarat
+
+Sedangkan value yang mungkin untuk `inner_code` adalah semua kode yang ada pada tabel Error Code [dibawah](#introduction/error-code)
+
+## Authentication
+
+Proses otentikasi pada API ini menggunakan **Basic Authentication**, yaitu dengan menyertakan `Authorization` header di setiap request nya. Value dari header tersebut adalah Secret Key untuk akun perusahaan Anda yang bisa didapatkan dari dashboard Big Flip yang kemudian diencode seperti wajarnya Basic Authentication. Berikut adalah beberapa contoh cara menyertakan secret key kedalam request:
+
+### PHP CURL
+
+```PHP
+$secret_key = "flip_prod_xxxxxxxaaaaaaabbbbbbbbbcccccdddd";
+
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_USERPWD, $secret_key.":");
+```
+
+atau
+
+```PHP
+$secret_key = "flip_prod_xxxxxxxaaaaaaabbbbbbbbbcccccdddd";
+$encoded_auth = base64_encode($secret_key.":");
+
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_HTTPHEADER, ["Authorization : Basic ".$encoded_auth]);
+```
+
+### New Postman
+
++ Pada tab `Authorization`, ganti `type` menjadi `Basic Auth`
++ Masukkan secret key pada isian `username`
++ Klik tombol `Update Request`
++ Header akan secara otomatis ditambahkan pada request yang Anda lakukan
+
+### Old Postman
+
++ Klik tab `Basic Auth`
++ Masukkan secret key pada isian `username`
++ Klik tombol `Refresh headers`
++ Header akan secara otomatis ditambahkan pada request yang Anda lakukan
+
+
+## General Response
+Berikut adalah response yang akan selalu sama di setiap request jika hal-hal berikut terjadi:
+
+### Unauthorized
+Ini response yang diberikan kalau value dari Authorization header atau Secret Key salah
+
++ HTTP Status Code: 401
+
++ Header: `Content-Type:application/json`
+
++ Body
+
+        {
+            "name": "Unauthorized",
+            "message": "You are requesting with an invalid credential.",
+            "status": 401,
+        }
+
+### Not Found
+Ini response jika url yang dicoba diakses salah, resource yang coba diakses tidak ada, anda tidak berhak mengakses resource terkait
+
++ HTTP Status Code: 404
+
++ Header: `Content-Type:application/json`
+
++ Body
+
+        {
+            "name": "Not Found",
+            "message": "Page not found.",
+            "status": 404,
+        }
+
+## Error Code
+
+Seperti telah dijelaskan diatas, setiap error validasi atau response dengan HTTP Status Code `422` akan disertai dengan error code. Berikut adalah daftar error code beserta maksudnya:
+
+
+| Code | Maksud |
+|------|--------|
+| 999 | Undefined error. Ini mungkin error yang terlewat dari penomoran error. Mohon hubungi kami jika ini terjadi. |
+| 1001 | Atribut terkait harus diisi / disertakan valuenya, sedangkan pada payload yang dikirim tidak ada data untuk atribut tersebut. |
+| 1002 | Data yang dikirim untuk atribut terkait dianggap tidak steril oleh validator. Hal yang dianggap tidak steril sampai saat ini (25 Januari 2017) adalah tag html, dan simbol `?`, `#`, `$`, `;`. |
+| 1020 | Atribut terkait hanya boleh mengandung angka |
+| 1021 | Nominal transfer yang dimasukkan kurang dari minimal jumlah yang diizinkan, yaitu 10 ribu rupiah |
+| 1024 | Data yang dikirimkan melebihi jumlah karakter yang diizinkan untuk atribut terkait |
+| 1025 | Nomor rekening yang dimasukkan tidak valid/salah berdasarkan pengecekan ke sistem bank |
+| 1026 | Nomor rekening yang dimasukkan dicurigai melakukan penipuan sehingga transaksi tidak bisa dilakukan ke rekening terkait |
+| 1027 | Nomor rekening BRI yang dimasukkan tidak tepat berjumlah 15 karakter |
+| 1029 | Terjadi kesalahan pada sistem Flip sehingga terjadi duplikat transaksi |
+| 1032 | Isi parameter pagination harus berupa angka yang lebih dari 0 |
+| 1033 | Bank yang dimasukkan tidak valid |
+| 1035 | Saldo deposit tidak cukup untuk melakukan transaksi |
+
+
+## Disbursement [/disbursement]
+
+Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bsm`, `muamalat`, `cimb`. Anda juga bisa mendapatkan kode bank dari endpoint [banks](#reference/0/general/banks)
+
+
+### Create Disbursement [POST]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
+
+    + Attributes
+        + no_rek_tujuan: 5270982912 (string) - No rekening tujuan, hanya boleh berisikan karakter angka
+        + bank_penerima: bni (string) - Kode bank tujuan
+        + nominal: 10000 (number) - Nominal jumlah yang ingin dikirimkan
+        + berita: bayar hutang (string) - Berita transfer
+        + kota: 391 (number) - Kode kota/negara pemilik rekening tujuan (Wajib disertakan untuk tujuan bank BNI, CIMB, BSM)
+
+    + Body
+
+            no_rek_tujuan=5270982912&bank_penerima=bni&nominal=10000&berita=bayar hutang&kota=391
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": 613,
+                "id_user": 22,
+                "nominal": "10000",
+                "status": "PENDING",
+                "timestamp": null,
+                "bank_penerima": "bni",
+                "no_rek_tujuan": "5270982912",
+                "nama_tujuan": "-",
+                "bank_pengirim": "bca",
+                "berita": "bayar hutang",
+                "bukti": "",
+                "time_served": null,
+                "id_bundle": 0,
+                "id_perusahaan": 10,
+                "kota": 391
+            }
+
++ Response 422 (application/json)
+
+    + Body
+
+            {
+                "code": "BALANCE_INSUFFICIENT",
+                "errors": [
+                    {
+                        "atribut": "nominal",
+                        "code": 1035,
+                        "pesan": "Deposit Anda tidak cukup untuk melakukan transaksi ini"
+                    }
+                ]
+            }
+
+            atau
+
+            {
+                "code": "VALIDATION_ERROR",
+                "errors": [
+                    {
+                        "atribut": "nominal",
+                        "code": 1001,
+                        "pesan": "Nominal harus diisi"
+                    },
+                    {
+                        "atribut": "berita",
+                        "code": 1002,
+                        "pesan": "Karakter yang diperbolehkan hanya berupa huruf"
+                    },
+                    {
+                        "atribut": "no_rek_tujuan",
+                        "code": 1020,
+                        "pesan": "Nomor rekening tujuan hanya boleh mengandung angka"
+                    },
+                    {
+                        "atribut": "bank_penerima",
+                        "code": 1033,
+                        "pesan": "Bank yang dimasukkan tidak valid"
+                    }
+                ]
+            }
+
+### Get all disbursement [GET /disbursement?pagination={pagination}&page={page}&sort={sort}&{atribut}={value}]
+
+Secara default hasil akan dibagi menjadi beberapa halaman. Setiap halaman akan berisi transaksi maksimal sejumlah parameter `pagination`.
+
++ Parameters
+    + pagination (number, optional) - Jumlah pembagian item perhalamannya
+        + Default: `20`
+    + page (number, optional) - Nomor halaman yang ingin diakses
+    + sort (string, optional) - Nama atribut yang ingin diurutkan. Value bisa menggunakan seluruh nama atribut.
+        `'atribut'` untuk mengurutkan secara **Ascending**, `'-atribut'` untuk mengurutkan secara **Descending**
+    + atribut (string, optional) - Nama atribut yang ingin difilter.
+    + value (string, optional) - Value dari atribut yang ingin difilter
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
+
++ Response 200 (application/json)
+| key | maksud |
+|-----|--------|
+| total | Jumlah keseluruhan data |
+| count | Jumlah data pada halaman yang sedang diakses |
+| page | Jumlah total halaman yang ada (no halaman terakhir) |
+| data | Array berisi data transaksi |
+
+    + Body
+
+            {
+                "total": 105,
+                "count": 20,
+                "page": 6,
+                "data": [
+                    {
+                        "id": 613,
+                        "id_user": 22,
+                        "nominal": 10000,
+                        "status": "PENDING",
+                        "timestamp": "2017-01-25 16:46:32",
+                        "bank_penerima": "bni",
+                        "no_rek_tujuan": "5270982912",
+                        "nama_tujuan": "-",
+                        "bank_pengirim": "bca",
+                        "berita": "bayar hutang",
+                        "bukti": "",
+                        "time_served": "0000-00-00 00:00:00",
+                        "id_bundle": 0,
+                        "id_perusahaan": 10,
+                        "kota": 391
+                    },
+                    ....
+                ]
+            }
+
+### Get disbursement [GET /disbursement/{id_transaksi}]
+
++ Parameters
+    + id_transaksi (number) - Id transaksi yang ingin dilihat informasinya
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": 613,
+                "id_user": 22,
+                "nominal": 10000,
+                "status": "PENDING",
+                "timestamp": "2017-01-25 16:46:32",
+                "bank_penerima": "bni",
+                "no_rek_tujuan": "5270982912",
+                "nama_tujuan": "-",
+                "bank_pengirim": "bca",
+                "berita": "bayar hutang",
+                "bukti": "",
+                "time_served": "0000-00-00 00:00:00",
+                "id_bundle": 0,
+                "id_perusahaan": 10,
+                "kota": 391
+            }
+
+### Update disbursement [PUT /disbursement/{id_transaksi}]
+Digunakan untuk memperbaiki informasi rekening ketika terdapat transaksi yang memiliki nomor rekening tujuan salah. Hanya atribut `bank_penerima`, `no_rek_tujuan`, dan `kota` yang boleh diubah. **Update hanya dapat dilakukan ketika transaksi berada dalam status `WRONG_ACCOUNT_NUMBER`.**
+
++ Parameters
+    + id_transaksi (number) - Id transaksi yang ingin diupdate
+
++ Request (application/x-www-form-urlencoded)
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
+    + Body
+
+            no_rek_tujuan=5270982912&bank_penerima=bni&kota=391
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": 613,
+                "id_user": 22,
+                "nominal": 10000,
+                "status": "PENDING",
+                "timestamp": "2017-01-25 16:46:32",
+                "bank_penerima": "bni",
+                "no_rek_tujuan": "5270982912",
+                "nama_tujuan": "-",
+                "bank_pengirim": "bca",
+                "berita": "bayar hutang",
+                "bukti": "",
+                "time_served": "0000-00-00 00:00:00",
+                "id_bundle": 0,
+                "id_perusahaan": 10,
+                "kota": 391
+            }
+
+### Get Antrian [GET /disbursement/{id_transaksi}/antrian]
+Hanya bisa dipakai untuk transaksi dengan `status` **PENDING**. Otherwise, hasil yang di return adalah `-1`.
+
++ Parameters
+    + id_transaksi (number) - Id transaksi
+
++ Request (application/x-www-form-urlencoded)
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "antrian": 12
+            }
+
+
+### Get List Kota [GET /disbursement/list-kota]
+Informasi ini diperlukan untuk transfer ke bank `bni` `bsm` `cimb` yang akan digunakan sebagai informasi saat pelaporan bulanan ke Bank Indonesia.
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "100": "Kepala Daerah Provinsi Jawa Barat",
+                "102": "Kab. Bekasi",
+                "103": "Kab. Purwakarta",
+                "106": "Kab. Karawang",
+                "108": "Kab. Bogor",
+                "109": "Kab. Sukabumi",
+                "110": "Kab. Cianjur",
+                .
+                .
+                .
+            }
+
+### Disbursement Callback [POST]
+Ketika status transaksi berubah dari `PENDING` menjadi `WRONG_ACCOUNT_NUMBER` atau `DONE`, sistem Flip akan segera mengirimkan request ke URL callback yang sudah Anda atur di dashboard Big Flip. URL callback tersebut kemudian harus memberikan respon dengan HTTP Status Code `200`. Jika proses ini gagal, atau URL tersebut tidak mengembalikan HTTP Status Code `200`, sistem Flip akan melakukan request ulang sebanyak 5 kali dengan jeda waktu selama 2 menit. Jika setelah 5 kali request masih dianggap gagal, kami akan segera mengirimkan email ke akun Flip yang terdaftar sebagai pemilik perusahaan agar dapat dilakukan tindak lanjut.
+
+Informasi request dan response disamping adalah contoh request yang dilakukan oleh sistem Flip dan response yang diharapkan.
+
+Untuk contoh cara menerima/handle callback dapat dilihat di [link ini](https://gist.github.com/luqmansungkar/d1af533ae71b5a2867c3287f2e4e9b31)
+
++ Request
+
+    + Attributes
+        + data (string) - Array berisi informasi transaksi dalam format JSON. Isi atribut ini akan sama persis dengan response dari GET Disbursement
+        + token: xxxxxyyyyyzzzzzzz (string) - Validation token untuk memastikan request berasal dari server Flip. Anda bisa melihat validation token untuk akun Anda di dashboard Big Flip.
+
+    + Body
+
+                data={$json_transaksi}&token=xxxxxyyyyyzzzzzzz
+
++ Response 200 (application/json)
+
+    + Body
+
+            [Tidak ada body response khusus yang diperlukan]
+
+
+
+
+## General [/general]
+
+### Balance [GET /general/balance]
+Informasi mengenai saldo deposit dari perusahaan/akun terkait
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "balance": 5000
+            }
+
+### Banks [GET /general/banks]
+Informasi mengenai list kode bank beserta nama bank terkait yang tersedia di layanan Flip
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "code": "mandiri",
+                    "nama": "Mandiri"
+                },
+                {
+                    "code": "bri",
+                    "nama": "BRI"
+                },
+                {
+                    "code": "bni",
+                    "nama": "BNI"
+                },
+                {
+                    "code": "bca",
+                    "nama": "BCA"
+                },
+                {
+                    "code": "bsm",
+                    "nama": "Bank Syariah Mandiri"
+                },
+                {
+                    "code": "cimb",
+                    "nama": "CIMB Niaga"
+                },
+                {
+                    "code": "muamalat",
+                    "nama": "Muamalat"
+                }
+            ]
+
+### Is Operational [GET /general/is-operational]
+Informasi mengenai apakah saat ini Flip sedang beroperasi.
+Saat ini waktu operasional Flip adalah **Senin-Jumat, pukul 09.00-19.00** dan **Sabtu, pukul 09.00-14.00**.
+Transaksi yang dibuat di luar jam operasional, akan diproses pada jam operasional selanjutnya.
+
++ Request
+
+    + Headers
+
+            api-key: [api key yang didapatkan dari admin]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "operational": true
+            }
+
+### Maintenance [GET /general/maintenance]
+Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user tidak bisa melakukan aktivitas apapun yang berkaitan dengan penulisan data (create/update). Request ke aktivitas tersebut pada saat maintenance akan mengembalikan status code `401`
+
++ Request
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "maintenance": "false"
+            }
+
+## Group Changelog
+
+## Senin, 30 Januari 2017
++ Penambahan bagian introduction
+
+## Kamis, 26 Januari 2017
++ Init dokumentasi API Big Flip
