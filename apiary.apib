@@ -7,11 +7,11 @@ Dokumentasi ini berisi informasi tentang API yang dapat digunakan oleh pengguna 
 
 Dokumentasi ini akan diupdate secara berkala ketika ada perubahan. API ini akan tetap berada pada versi `v1` selama tidak ada perubahan yang mengubah response dari endpoint yang sudah ada sebelumnya. Jika dilakukan update yang mengubah reponse dari endpoint yang sudah ada sebelumnya (bukan penambahan endpoint baru), maka versi akan dinaikkan secara incremental (v2, v3, dst), dengan tetap menjaga agar versi-versi sebelumnya tetap bisa dipakai (ketika sudah v3, v1 dan v2 tetap bisa dipakai)
 
-Dokumentasi ini menyediakan beberapa fitur untuk mempermudah Anda dalam mencoba endpoint yang disediakan. Anda dapat mencobanya dengan mengklik salah satu endpoint yang diinginkan, kemudian klik tombol 'Switch to Console' pada bagian detil di sebelah kanan. Anda juga dapat melihat contoh kode untuk mengakses endpoint tersebut dalam berbagai bahasa pemrograman dengan mengklik dropdown bertuliskan 'Raw'.
+Dokumentasi ini menyediakan beberapa fitur untuk mempermudah Kakak dalam mencoba endpoint yang disediakan. Kakak dapat mencobanya dengan mengklik salah satu endpoint yang diinginkan, kemudian klik tombol 'Switch to Console' pada bagian detil di sebelah kanan. Kakak juga dapat melihat contoh kode untuk mengakses endpoint tersebut dalam berbagai bahasa pemrograman dengan mengklik dropdown bertuliskan 'Raw'.
 
 Seluruh perubahan yang dilakukan pada dokumentasi ini akan dituliskan pada bagian [changelog](#reference/changelog).
 
-API ini dibuat agar bisa digunakan semudah mungkin oleh developer, oleh karena itu Anda dapat menyampaikan kritik dan saran mengenai API ini melalui email ke email pribadi saya di [luqman@flip.id](mailto:luqman@flip.id).
+API ini dibuat agar bisa digunakan semudah mungkin oleh developer, oleh karena itu Kakak dapat menyampaikan kritik dan saran mengenai API ini melalui email ke email pribadi saya di [luqman@flip.id](mailto:luqman@flip.id).
 Kritik dan saran terhadap dokumentasi ini bisa disampaikan dengan membuat issue pada [repositori github dokumentasi ini](https://github.com/luqmansungkar/dokumentasi-big-flip-api)
 
 ## General Explanation
@@ -39,14 +39,14 @@ Response untuk kode status http **422** akan memiliki format sebagai berikut:
 ```
 
  Value yang mungkin untuk `outer_code` adalah:
- + `BALANCE_INSUFFICIENT` yaitu ketika saldo deposit akun anda tidak cukup untuk melakukan transaksi ( saldo < (nominal + biaya) )
+ + `BALANCE_INSUFFICIENT` yaitu ketika saldo deposit akun Kakak tidak cukup untuk melakukan transaksi ( saldo < (nominal + biaya) )
  + `VALIDATION_ERROR` error yang terkait validasi data atau data yang tidak memenuhi syarat
 
 Sedangkan value yang mungkin untuk `inner_code` adalah semua kode yang ada pada tabel Error Code [dibawah](#introduction/error-code)
 
 ## Authentication
 
-Proses otentikasi pada API ini menggunakan **Basic Authentication**, yaitu dengan menyertakan `Authorization` header di setiap request nya. Value dari header tersebut adalah Secret Key untuk akun perusahaan Anda yang bisa didapatkan dari dashboard Big Flip yang kemudian diencode seperti wajarnya Basic Authentication. Berikut adalah beberapa contoh cara menyertakan secret key kedalam request:
+Proses otentikasi pada API ini menggunakan **Basic Authentication**, yaitu dengan menyertakan `Authorization` header di setiap request nya. Value dari header tersebut adalah Secret Key untuk akun perusahaan Kakak yang bisa didapatkan dari dashboard Big Flip yang kemudian diencode seperti wajarnya Basic Authentication. Berikut adalah beberapa contoh cara menyertakan secret key kedalam request:
 
 ### PHP CURL
 
@@ -72,14 +72,14 @@ curl_setopt($curl, CURLOPT_HTTPHEADER, ["Authorization : Basic ".$encoded_auth])
 + Pada tab `Authorization`, ganti `type` menjadi `Basic Auth`
 + Masukkan secret key pada isian `username`
 + Klik tombol `Update Request`
-+ Header akan secara otomatis ditambahkan pada request yang Anda lakukan
++ Header akan secara otomatis ditambahkan pada request yang Kakak lakukan
 
 ### Old Postman
 
 + Klik tab `Basic Auth`
 + Masukkan secret key pada isian `username`
 + Klik tombol `Refresh headers`
-+ Header akan secara otomatis ditambahkan pada request yang Anda lakukan
++ Header akan secara otomatis ditambahkan pada request yang Kakak lakukan
 
 
 ## General Response
@@ -101,7 +101,7 @@ Ini response yang diberikan kalau value dari Authorization header atau Secret Ke
         }
 
 ### Not Found
-Ini response jika url yang dicoba diakses salah, resource yang coba diakses tidak ada, anda tidak berhak mengakses resource terkait
+Ini response jika url yang dicoba diakses salah, resource yang coba diakses tidak ada, Kakak tidak berhak mengakses resource terkait
 
 + HTTP Status Code: 404
 
@@ -139,7 +139,7 @@ Seperti telah dijelaskan diatas, setiap error validasi atau response dengan HTTP
 
 ## Disbursement [/disbursement]
 
-Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bsm`, `muamalat`, `cimb`. Anda juga bisa mendapatkan kode bank dari endpoint [banks](#reference/0/general/banks)
+Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bsm`, `muamalat`, `cimb`. Kakak juga bisa mendapatkan kode bank dari endpoint [banks](#reference/0/general/banks)
 
 
 ### Create Disbursement [POST]
@@ -194,7 +194,7 @@ Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bs
                     {
                         "atribut": "nominal",
                         "code": 1035,
-                        "pesan": "Deposit Anda tidak cukup untuk melakukan transaksi ini"
+                        "pesan": "Deposit Kakak tidak cukup untuk melakukan transaksi ini"
                     }
                 ]
             }
@@ -402,7 +402,7 @@ Informasi ini diperlukan untuk transfer ke bank `bni` `bsm` `cimb` yang akan dig
             }
 
 ### Disbursement Callback [POST]
-Ketika status transaksi berubah dari `PENDING` menjadi `WRONG_ACCOUNT_NUMBER` atau `DONE`, sistem Flip akan segera mengirimkan request ke URL callback yang sudah Anda atur di dashboard Big Flip. URL callback tersebut kemudian harus memberikan respon dengan HTTP Status Code `200`. Jika proses ini gagal, atau URL tersebut tidak mengembalikan HTTP Status Code `200`, sistem Flip akan melakukan request ulang sebanyak 5 kali dengan jeda waktu selama 2 menit. Jika setelah 5 kali request masih dianggap gagal, kami akan segera mengirimkan email ke akun Flip yang terdaftar sebagai pemilik perusahaan agar dapat dilakukan tindak lanjut.
+Ketika status transaksi berubah dari `PENDING` menjadi `WRONG_ACCOUNT_NUMBER` atau `DONE`, sistem Flip akan segera mengirimkan request ke URL callback yang sudah Kakak atur di dashboard Big Flip. URL callback tersebut kemudian harus memberikan respon dengan HTTP Status Code `200`. Jika proses ini gagal, atau URL tersebut tidak mengembalikan HTTP Status Code `200`, sistem Flip akan melakukan request ulang sebanyak 5 kali dengan jeda waktu selama 2 menit. Jika setelah 5 kali request masih dianggap gagal, kami akan segera mengirimkan email ke akun Flip yang terdaftar sebagai pemilik perusahaan agar dapat dilakukan tindak lanjut.
 
 Informasi request dan response disamping adalah contoh request yang dilakukan oleh sistem Flip dan response yang diharapkan.
 
@@ -412,7 +412,7 @@ Untuk contoh cara menerima/handle callback dapat dilihat di [link ini](https://g
 
     + Attributes
         + data (string) - Array berisi informasi transaksi dalam format JSON. Isi atribut ini akan sama persis dengan response dari GET Disbursement
-        + token: xxxxxyyyyyzzzzzzz (string) - Validation token untuk memastikan request berasal dari server Flip. Anda bisa melihat validation token untuk akun Anda di dashboard Big Flip.
+        + token: xxxxxyyyyyzzzzzzz (string) - Validation token untuk memastikan request berasal dari server Flip. Kakak bisa melihat validation token untuk akun Kakak di dashboard Big Flip.
 
     + Body
 
