@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://api.big.flip.id/v1/
+HOST: https://sandbox.flip.id/api/v1/
 
 # Big Flip API v1
 
@@ -135,6 +135,17 @@ Seperti telah dijelaskan diatas, setiap error validasi atau response dengan HTTP
 | 1032 | Isi parameter pagination harus berupa angka yang lebih dari 0 |
 | 1033 | Bank yang dimasukkan tidak valid |
 | 1035 | Saldo deposit tidak cukup untuk melakukan transaksi |
+
+## Sandbox
+
+Kami menyiapkan sandbox/testing environment untuk Kakak melakukan percobaan terhadap API Big Flip. URL yang digunakan pada dokumentasi ini (**https://sandbox.flip.id/api/v1/**) adalah URL sandbox untuk mempermudah Kakak melakukan testing langsung dari halaman dokumentasi ini.
+
+Environment sandbox ini terpisah dari environment production, sehingga apapun yang Kakak lakukan di sandbox tidak akan berpengaruh terhadap akun Big Flip Kakak. Untuk menambahkan saldo pada akun sandbox Kakak, silakan sampaikan melalui email ke luqman@flip.id dengan mencantumkan id perusahaan Kakak. Secret Key dan validation token yang dimiliki akun sandbox akan berbeda dengan akun Big Flip Kakak.
+
+## Production
+
+URL yang digunakan pada production environment adalah **https://big.flip.id/api/v1/**. Penyimpanan secret key dan validation token pada sisi client/aplikasi Kakak sepenuhnya merupakan tanggung jawab Kakak. Kelalaian dalam proses penyimpanan Secret Key dapat berakibat pada penggunaan saldo deposit perusahaan Kakak oleh pihak yang tidak bertanggung jawab. Jika Kakak merasa bahwa Secret Key Kakak telah diketahui oleh pihak lain, Kakak dapat mengubahnya melalui dashboard Big Flip. Pengubahan Secret Key akan menyebabkan Secret Key yang lama menjadi tidak bisa digunakan.
+
 
 
 ## Disbursement [/disbursement]
@@ -528,9 +539,15 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
 
 ## Group Changelog
 
-## Senin, 30 Januari 2017
+### Kamis, 2 Februari 2017
++ Tambah penjelasan mengenai Sandbox dan Production
+
+### Rabu, 1 Februari 2017
++ Ganti url api
+
+### Senin, 30 Januari 2017
 + Penambahan bagian introduction
 + Connect dokumentasi dengan repo github
 
-## Kamis, 26 Januari 2017
+### Kamis, 26 Januari 2017
 + Init dokumentasi API Big Flip
