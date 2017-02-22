@@ -144,7 +144,7 @@ Environment sandbox ini terpisah dari environment production, sehingga apapun ya
 
 Jika Kakak belum memiliki akun Big Flip, Kakak juga dapat langsung mencoba API di Sandbox dengan menggunakan akun sampel yang telah kami sediakan. Silakan gunakan API Secret Key berikut ketika melakukan request ke API di Sandbox Flip:
 
-+ `JDJ5JDEzJExVeFd4RE54M0JZaTZ3UTNhbEJqT3UwcC9Cd3B6SDc4c2NFeGNHZkJtZzRELlZPa1dQQTV1`
++ `JDJ5JDEzJHdScmR4djNzaHZLUXRZQWdEMFRGZS4weFI0ZGs3ZXFOdjBjUVpzY1pCZW5OUmJPYTVWNHhX`
 
 ## Production
 
@@ -439,7 +439,56 @@ Untuk contoh cara menerima/handle callback dapat dilihat di [link ini](https://g
 
             [Tidak ada body response khusus yang diperlukan]
 
+### Disbursement Status [GET /disbursement/status]
+Mengembalikan antrian setiap Bank dan kondisi operasional masing-masing Bank. Saat ini `status` akan berisi `OPERATIONAL` jika sedang tidak ada masalah dan `DISTURBED` jika bank terkait sedang mengalami gangguan.
 
++ Request (application/x-www-form-urlencoded)
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "kode": "mandiri",
+                    "antrian": "5",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "bri",
+                    "antrian": "7",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "bni",
+                    "antrian": "2",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "bca",
+                    "antrian": "6",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "bsm",
+                    "antrian": "3",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "cimb",
+                    "antrian": "0",
+                    "status": "OPERATIONAL"
+                },
+                {
+                    "kode": "muamalat",
+                    "antrian": "0",
+                    "status": "DISTURBED"
+                }
+            ]
 
 
 ## General [/general]
@@ -542,6 +591,9 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
             }
 
 ## Group Changelog
+
+### Rabu, 22 Februari 2017
++ Tambah endpoint disbursement status
 
 ### Kamis, 2 Februari 2017
 + Tambah penjelasan mengenai Sandbox dan Production
