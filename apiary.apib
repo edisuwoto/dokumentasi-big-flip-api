@@ -144,7 +144,7 @@ Environment sandbox ini terpisah dari environment production, sehingga apapun ya
 
 Jika Kakak belum memiliki akun Big Flip, Kakak juga dapat langsung mencoba API di Sandbox dengan menggunakan akun sampel yang telah kami sediakan. Silakan gunakan API Secret Key berikut ketika melakukan request ke API di Sandbox Flip:
 
-+ `JDJ5JDEzJHdScmR4djNzaHZLUXRZQWdEMFRGZS4weFI0ZGs3ZXFOdjBjUVpzY1pCZW5OUmJPYTVWNHhX`
++ `JDJ5JDEzJExVeFd4RE54M0JZaTZ3UTNhbEJqT3UwcC9Cd3B6SDc4c2NFeGNHZkJtZzRELlZPa1dQQTV1`
 
 ## Production
 
@@ -214,7 +214,7 @@ Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bs
                 ]
             }
 
-            atau
+            ATAU
 
             {
                 "code": "VALIDATION_ERROR",
@@ -241,6 +241,132 @@ Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bs
                     }
                 ]
             }
+
+### Create Multiple Disbursement [POST /disbursement/multi]
+Endpoint untuk membuat beberapa transaksi disbursement sekaligus dalam sekali request. Jika ada salah satu transaksi yang mengalami kegagalan validasi atau kegagalan dalam hal lainnya, **seluruh transaksi** dalam satu request terkait akan **batal dibuat**. Untuk mencegah gagal terbuatnya transaksi, kami menyarankan untuk melakukan validasi terlebih dahulu untuk tiap-tiap transaksi melalui endpoint [validate transaksi](#reference/0/disbursement/validate-disbursement).
+
++ Request (application/json)
+Body request dikirimkan dalam array berformat JSON
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
+    + Body
+
+            [
+                {
+                    "bank_penerima" : "bca",
+                    "no_rek_tujuan" : "123123123",
+                    "nominal" : 20000,
+                    "berita" : "transaksi 1"
+                },
+                {
+                    "bank_penerima" : "bsm",
+                    "no_rek_tujuan" : "523234234",
+                    "nominal" : 20000,
+                    "berita" : "transaksi 2",
+                    "kota" : 391
+                }
+            ]
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "id": 682,
+                    "id_user": 23,
+                    "nominal": 20000,
+                    "status": "PENDING",
+                    "timestamp": null,
+                    "bank_penerima": "bca",
+                    "no_rek_tujuan": "123123123",
+                    "nama_tujuan": "-",
+                    "bank_pengirim": "mandiri",
+                    "berita": "transaksi 1",
+                    "bukti": "",
+                    "time_served": null,
+                    "id_bundle": 0,
+                    "id_perusahaan": 7,
+                    "kota": null
+                },
+                {
+                    "id": 683,
+                    "id_user": 23,
+                    "nominal": 20000,
+                    "status": "PENDING",
+                    "timestamp": null,
+                    "bank_penerima": "bsm",
+                    "no_rek_tujuan": "523234234",
+                    "nama_tujuan": "-",
+                    "bank_pengirim": "mandiri",
+                    "berita": "transaksi 2",
+                    "bukti": "",
+                    "time_served": null,
+                    "id_bundle": 0,
+                    "id_perusahaan": 7,
+                    "kota": 391
+                }
+            ]
+
++ Response 422 (application/json)
+
+    + Body
+
+            {
+                "code": "VALIDATION_ERROR",
+                "errors": [
+                    {
+                        "atribut": "no_rek_tujuan",
+                        "code": 999,
+                        "pesan": "Format JSON tidak valid"
+                    }
+                ]
+            }
+
+            ATAU
+
+            {
+                "code": "BALANCE_INSUFFICIENT",
+                "errors": [
+                    {
+                        "atribut": "nominal",
+                        "code": 1035,
+                        "pesan": "Deposit Kakak tidak cukup untuk melakukan transaksi ini"
+                    }
+                ]
+            }
+
+            ATAU
+
+            {
+                "code": "VALIDATION_ERROR",
+                "errors": [
+                    {
+                        "atribut": "nominal",
+                        "code": 1001,
+                        "pesan": "Nominal harus diisi"
+                    },
+                    {
+                        "atribut": "berita",
+                        "code": 1002,
+                        "pesan": "Karakter yang diperbolehkan hanya berupa huruf"
+                    },
+                    {
+                        "atribut": "no_rek_tujuan",
+                        "code": 1020,
+                        "pesan": "Nomor rekening tujuan hanya boleh mengandung angka"
+                    },
+                    {
+                        "atribut": "bank_penerima",
+                        "code": 1033,
+                        "pesan": "Bank yang dimasukkan tidak valid"
+                    }
+                ]
+            }
+
 
 ### Get all disbursement [GET /disbursement?pagination={pagination}&page={page}&sort={sort}&{atribut}={value}]
 
@@ -416,7 +542,7 @@ Informasi ini diperlukan untuk transfer ke bank `bni` `bsm` `cimb` yang akan dig
                 .
             }
 
-### Disbursement Callback [POST]
+### Disbursement Callback [POST /your.url/callback]
 Ketika status transaksi berubah dari `PENDING` menjadi `WRONG_ACCOUNT_NUMBER` atau `DONE`, sistem Flip akan segera mengirimkan request ke URL callback yang sudah Kakak atur di dashboard Big Flip. URL callback tersebut kemudian harus memberikan respon dengan HTTP Status Code `200`. Jika proses ini gagal, atau URL tersebut tidak mengembalikan HTTP Status Code `200`, sistem Flip akan melakukan request ulang sebanyak 5 kali dengan jeda waktu selama 2 menit. Jika setelah 5 kali request masih dianggap gagal, kami akan segera mengirimkan email ke akun Flip yang terdaftar sebagai pemilik perusahaan agar dapat dilakukan tindak lanjut.
 
 Informasi request dan response disamping adalah contoh request yang dilakukan oleh sistem Flip dan response yang diharapkan.
@@ -490,6 +616,55 @@ Mengembalikan antrian setiap Bank dan kondisi operasional masing-masing Bank. Sa
                 }
             ]
 
+### Validate Disbursement [POST /disbursement/validate]
+Endpoint untuk melakukan validasi terhadap suatu transaksi disbursement. Endpoint **tidak membuat transaksi** dan hanya akan memberitahu apakah nilai-nilai yang dikirimkan untuk suatu transaksi akan valid atau tidak, dan jika tidak akan memberitahu kesalahannya.
+Endpoint ini dapat digunakan untuk melakukan validasi pada calon-calon transaksi yang nantinya akan dilakukan via endpoint create multiple disbursement.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Headers
+
+            Authorization: Basic [secret key yang didapatkan dari dashboard Big Flip]
+
+
+    + Attributes
+        + no_rek_tujuan: 5270982912 (string) - No rekening tujuan, hanya boleh berisikan karakter angka
+        + bank_penerima: bni (string) - Kode bank tujuan
+        + nominal: 10000 (number) - Nominal jumlah yang ingin dikirimkan
+        + berita: bayar hutang (string) - Berita transfer
+        + kota: 391 (number) - Kode kota/negara pemilik rekening tujuan (Wajib disertakan untuk tujuan bank BNI, CIMB, BSM)
+
+    + Body
+
+            no_rek_tujuan=5270982912&bank_penerima=bni&nominal=10000&berita=bayar hutang&kota=391
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "message": "Transaksi valid"
+            }
+
++ Response 422 (application/json)
+
+    + Body
+
+            {
+                "code": "VALIDATION_ERROR",
+                "errors": [
+                    {
+                        "atribut": "berita",
+                        "code": 1002,
+                        "pesan": "Karakter yang diperbolehkan hanya berupa huruf"
+                    },
+                    {
+                        "atribut": "kota",
+                        "code": 1001,
+                        "pesan": "Pilihan kota tempat tujuan harus diisi"
+                    }
+                ]
+            }
 
 ## General [/general]
 
@@ -591,6 +766,11 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
             }
 
 ## Group Changelog
+
+### Minggu, 12 Maret 2017
++ Ganti sampel API Secret Key
++ Tambah endpoint create multiple disbursement [#](#reference/0/disbursement/create-multiple-disbursement)
++ Tambah endpoint validate disbursement [#](#reference/0/disbursement/validate-disbursement)
 
 ### Rabu, 22 Februari 2017
 + Tambah endpoint disbursement status
