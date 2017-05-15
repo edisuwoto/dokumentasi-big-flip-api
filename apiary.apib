@@ -41,6 +41,7 @@ Response untuk kode status http **422** akan memiliki format sebagai berikut:
  Value yang mungkin untuk `outer_code` adalah:
  + `BALANCE_INSUFFICIENT` yaitu ketika saldo deposit akun Kakak tidak cukup untuk melakukan transaksi ( saldo < (nominal + biaya) )
  + `VALIDATION_ERROR` error yang terkait validasi data atau data yang tidak memenuhi syarat
+ + `RACE_CONDITION` yaitu ketika terjadi lebih dari satu transaksi dalam waktu bersamaan. Lebih lengkapnya dijelaskan pada bagian [RACE_CONDITION](introduction/race-condition)
 
 Sedangkan value yang mungkin untuk `inner_code` adalah semua kode yang ada pada tabel Error Code [dibawah](#introduction/error-code)
 
@@ -149,6 +150,25 @@ Jika Kakak belum memiliki akun Big Flip, Kakak juga dapat langsung mencoba API d
 ## Production
 
 URL yang digunakan pada production environment adalah **https://big.flip.id/api/v1/**. Penyimpanan secret key dan validation token pada sisi client/aplikasi Kakak sepenuhnya merupakan tanggung jawab Kakak. Kelalaian dalam proses penyimpanan Secret Key dapat berakibat pada penggunaan saldo deposit perusahaan Kakak oleh pihak yang tidak bertanggung jawab. Jika Kakak merasa bahwa Secret Key Kakak telah diketahui oleh pihak lain, Kakak dapat mengubahnya melalui dashboard Big Flip. Pengubahan Secret Key akan menyebabkan Secret Key yang lama menjadi tidak bisa digunakan.
+
+## Race Condition
+
+Race condition adalah ketika terjadi lebih dari 1 request pembuatan transaksi dalam waktu yang hampir bersamaan (hanya berjeda beberapa milisecon). Hal ini terkadang dapat menyebabkan inkonsistensi deposit pada akun Kakak. Oleh karena itu, jika terjadi hal demikian, sistem flip hanya akan menerima satu transaksi yang paling awal dan menggagalkan yang lainnya. Request yang digagalkan akan mendapat response sebagai berikut:
+
+```
+{
+    "code": "RACE_CONDITION",
+    "errors": [
+        {
+            "atribut": "id",
+            "code": 999,
+            "pesan": "Terjadi race condition, mohon ulangi transaksi"
+        }
+    ]
+}
+```
+
+Jika mendapat response seperti ini, sistem Kakak perlu melakukan request transaksi ulang. Untuk mengurangi terjadinya hal ini, sistem flip secara internal juga melakukan percobaan beberapa kali sebelum menggagalkan transaksi. Namun, dalam beberapa kasus hal ini masih mungkin terjadi sehingga tetap perlu penanganan dari sistem milik Kakak.
 
 
 
@@ -766,6 +786,9 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
             }
 
 ## Group Changelog
+
+### Senin, 15 Mei 2017
++ Tambah informasi mengenai race condition [#](introduction/race-condition)
 
 ### Minggu, 12 Maret 2017
 + Ganti sampel API Secret Key
