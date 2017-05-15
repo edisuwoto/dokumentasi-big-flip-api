@@ -41,7 +41,7 @@ Response untuk kode status http **422** akan memiliki format sebagai berikut:
  Value yang mungkin untuk `outer_code` adalah:
  + `BALANCE_INSUFFICIENT` yaitu ketika saldo deposit akun Kakak tidak cukup untuk melakukan transaksi ( saldo < (nominal + biaya) )
  + `VALIDATION_ERROR` error yang terkait validasi data atau data yang tidak memenuhi syarat
- + `RACE_CONDITION` yaitu ketika terjadi lebih dari satu transaksi dalam waktu bersamaan. Lebih lengkapnya dijelaskan pada bagian [RACE_CONDITION](introduction/race-condition)
+ + `RACE_CONDITION` yaitu ketika terjadi lebih dari satu transaksi dalam waktu bersamaan. Lebih lengkapnya dijelaskan pada bagian [RACE_CONDITION](#introduction/race-condition)
 
 Sedangkan value yang mungkin untuk `inner_code` adalah semua kode yang ada pada tabel Error Code [dibawah](#introduction/error-code)
 
@@ -788,7 +788,7 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
 ## Group Changelog
 
 ### Senin, 15 Mei 2017
-+ Tambah informasi mengenai race condition [#](introduction/race-condition)
++ Tambah informasi mengenai race condition [#](#introduction/race-condition)
 
 ### Minggu, 12 Maret 2017
 + Ganti sampel API Secret Key
