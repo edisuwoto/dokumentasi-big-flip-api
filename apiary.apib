@@ -216,7 +216,8 @@ Kode bank yang valid adalah (case sensitive) `bca`, `bri`, `bni`, `mandiri`, `bs
                 "time_served": null,
                 "id_bundle": 0,
                 "id_perusahaan": 10,
-                "kota": 391
+                "kota": 391,
+                "biaya": 3500
             }
 
 + Response 422 (application/json)
@@ -310,7 +311,8 @@ Body request dikirimkan dalam array berformat JSON
                     "time_served": null,
                     "id_bundle": 0,
                     "id_perusahaan": 7,
-                    "kota": null
+                    "kota": null,
+                    "biaya": 3500
                 },
                 {
                     "id": 683,
@@ -327,7 +329,8 @@ Body request dikirimkan dalam array berformat JSON
                     "time_served": null,
                     "id_bundle": 0,
                     "id_perusahaan": 7,
-                    "kota": 391
+                    "kota": 391,
+                    "biaya": 3500
                 }
             ]
 
@@ -438,7 +441,8 @@ Secara default hasil akan dibagi menjadi beberapa halaman. Setiap halaman akan b
                         "time_served": "0000-00-00 00:00:00",
                         "id_bundle": 0,
                         "id_perusahaan": 10,
-                        "kota": 391
+                        "kota": 391,
+                        "biaya": 3500
                     },
                     ....
                 ]
@@ -474,7 +478,8 @@ Secara default hasil akan dibagi menjadi beberapa halaman. Setiap halaman akan b
                 "time_served": "0000-00-00 00:00:00",
                 "id_bundle": 0,
                 "id_perusahaan": 10,
-                "kota": 391
+                "kota": 391,
+                "biaya": 3500
             }
 
 ### Update disbursement [PUT /disbursement/{id_transaksi}]
@@ -512,7 +517,8 @@ Digunakan untuk memperbaiki informasi rekening ketika terdapat transaksi yang me
                 "time_served": "0000-00-00 00:00:00",
                 "id_bundle": 0,
                 "id_perusahaan": 10,
-                "kota": 391
+                "kota": 391,
+                "biaya": 3500
             }
 
 ### Get Antrian [GET /disbursement/{id_transaksi}/antrian]
@@ -786,6 +792,9 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
             }
 
 ## Group Changelog
+
+### Jumat, 18 Agustus 2017
++ Menambahkan atribut biaya di setiap response disbursement
 
 ### Senin, 15 Mei 2017
 + Tambah informasi mengenai race condition [#](#introduction/race-condition)
