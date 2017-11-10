@@ -170,7 +170,17 @@ Race condition adalah ketika terjadi lebih dari 1 request pembuatan transaksi da
 
 Jika mendapat response seperti ini, sistem Kakak perlu melakukan request transaksi ulang. Untuk mengurangi terjadinya hal ini, sistem flip secara internal juga melakukan percobaan beberapa kali sebelum menggagalkan transaksi. Namun, dalam beberapa kasus hal ini masih mungkin terjadi sehingga tetap perlu penanganan dari sistem milik Kakak.
 
+## Idempotent Request
 
+API ini mendukung [idempotent request](http://restcookbook.com/HTTP%20Methods/idempotency/), sehingga Kakak bisa mengulang suatu request dan selalu mendapat hasil yang sama. Sebagai contoh, jika sistem Kakak sedang mengirimkan suatu request disbursement, dan request tersebut gagal karena timeout atau gangguan jaringan, sistem Kakak dapat mengulang request tersebut tanpa khawatir membuat request yang sama lebih dari sekali.
+
+Untuk melakukan idempotent request, Kakak dapat menyertakan header `idempotency-key` pada request disbursement Kakak. Isi dari header tersebut adalah suatu string unik sebagai pengenal transaksi Kakak. String tersebut bisa berupa id transaksi pada sistem Kakak, atau string random unik apapun yang bisa menjadi pembeda/pengenal transaksi Kakak. String ini dibatasi hanya sepanjang 255 karakter.
+
+String idempotency key ini akan disimpan selamanya dan tidak bisa digunakan ulang. Sistem Flip akan selalu mengirimkan response yang sama untuk setiap request yang dikirimkan dengan idempotency key yang sama.
+
+```
+idempotency-key: 8anU9saqIU798wOo
+```
 
 ## Disbursement [/disbursement]
 
@@ -799,6 +809,9 @@ Informasi mengenai apakah saat ini Flip sedang dalam maintenance. Jika ya, user 
             }
 
 ## Group Changelog
+
+### Jumat, 10 November 2017
++ Tambah informasi mengenai idempotency key
 
 ### Rabu, 23 Agustus 2017
 + Menambahkan atribut biaya di response general/banks [#](#reference/0/general/banks)
